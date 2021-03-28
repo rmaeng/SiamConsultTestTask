@@ -14,7 +14,11 @@ namespace OrderingAPI.Infrastructure
 
         public OrderingContext(DbContextOptions<OrderingContext> options) : base(options)
         {
-            Database.EnsureCreated();
+            if (Database.EnsureCreated())
+            {
+                var contextInitializer = new OrderingContextInitializer();
+                contextInitializer.Seed(this);
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
