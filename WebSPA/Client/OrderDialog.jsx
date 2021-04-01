@@ -21,7 +21,7 @@ import TextField from '@material-ui/core/TextField';
 import Datepicker from './Datepicker.jsx';
 import OrderDetailDialog from './OrderDetailDialog.jsx'
 
-import { orderingApiMock as orderingApi } from './orderingApiMock.js';
+import { orderingApi } from './orderingApi.js';
 
 export default function OrderDialog(props) {
     const { onClose, open, model } = props;

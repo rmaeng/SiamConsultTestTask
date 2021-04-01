@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderingAPI.Infrastructure;
+using OrderingAPI.Infrastructure.Repositories;
 
 namespace OrderingAPI
 {
@@ -23,6 +24,8 @@ namespace OrderingAPI
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddDbContext<OrderingContext>(options => options.UseInMemoryDatabase("SiamConsult.OrderingDb"));
+
+            services.AddTransient<IOrderingRepository, OrderingRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

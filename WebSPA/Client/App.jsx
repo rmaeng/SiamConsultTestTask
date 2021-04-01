@@ -14,7 +14,7 @@ import Typography from '@material-ui/core/Typography';
 
 import OrderDialog from './OrderDialog.jsx';
 
-import { orderingApiMock as orderingApi } from './orderingApiMock.js';
+import { orderingApi } from './orderingApi.js';
 
 export default function App() {
     const [salesOrders, setSalesOrders] = useState([]);
