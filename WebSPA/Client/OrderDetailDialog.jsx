@@ -7,7 +7,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControl from '@material-ui/core/FormControl';
+import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
 
 import Datepicker from './Datepicker.jsx';
 
@@ -47,6 +49,16 @@ export default function OrderDetailDialog(props) {
                         options={products}
                         getOptionLabel={(option) => option.name}
                         getOptionSelected={(option, value) => option.productId === value.productId}
+                        renderOption={(option) => (
+                            <Grid container direction="column">
+                                <Grid item>{option.name}</Grid>
+                                <Grid item>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {option.price}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        )}
                         onOpen={() => {
                             if (products.length === 0)
                                 orderingApi.getProducts()
