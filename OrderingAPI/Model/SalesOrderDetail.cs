@@ -13,6 +13,11 @@ namespace OrderingAPI.Model
         public int Id { get; set; }
 
         /// <summary>
+        /// <see cref="Product"/>
+        /// </summary>
+        public int ProductId { get; set; }
+
+        /// <summary>
         /// Продукт.
         /// </summary>
         public Product Product { get; set; }

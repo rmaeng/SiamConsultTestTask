@@ -13,7 +13,7 @@ namespace OrderingAPI.Infrastructure.EntityConfigurations
             builder.HasKey(sod => sod.Id);
             
             builder.HasOne<SalesOrder>().WithMany(so => so.Details).IsRequired();
-            builder.HasOne(sod => sod.Product).WithMany().IsRequired();
+            builder.HasOne(sod => sod.Product).WithMany().HasForeignKey(sod => sod.ProductId).IsRequired();
 
             builder.Property(sod => sod.OrderQuantity).IsRequired();
 
