@@ -37,13 +37,14 @@ export default function App() {
     const addOrUpdateOrder = (salesOrder) => {
         if (salesOrder) {
             if (salesOrder.salesOrderId) {
-                orderingApi.updateOrder(salesOrder);
+                orderingApi.updateOrder(salesOrder)
+                    .then(() => setIsOrderDialogOpen(false));
             } else {
-                orderingApi.createOrder(salesOrder);
+                orderingApi.createOrder(salesOrder)
+                    .then(() => setIsOrderDialogOpen(false));
             }
-        }
-
-        setIsOrderDialogOpen(false);
+        } else
+            setIsOrderDialogOpen(false);
     };
 
     const deleteOrder = (salesOrder) => {
