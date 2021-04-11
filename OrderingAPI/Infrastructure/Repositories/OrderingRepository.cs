@@ -61,44 +61,68 @@ namespace OrderingAPI.Infrastructure.Repositories
 
         public SalesOrder UpdateOrder(SalesOrder orderToUpdate)
         {
-            _orderingContext.Attach(orderToUpdate);
+            var existingOrder = _orderingContext.SalesOrders
+                .Include(x => x.Customer)
+                .Include(x => x.SalesStatus)
+                .Include(x => x.Details).ThenInclude(x => x.Product)
+                .FirstOrDefault(so => so.SalesOrderId == orderToUpdate.SalesOrderId);
 
-            _orderingContext.Update(orderToUpdate);
+            if (existingOrder is null)
+                return null;
+
+            _orderingContext.Entry(existingOrder).CurrentValues.SetValues(orderToUpdate);
+
+            UpdateCustomer();
+            UpdateSalesStatus();
             UpdateSalesOrderDetailCollection();
 
             _orderingContext.SaveChanges();
 
             return orderToUpdate;
 
+            void UpdateCustomer()
+            {
+                if (!_orderingContext.Customers.Local.Any(c => c.CustomerId == orderToUpdate.Customer.CustomerId))
+                    _orderingContext.Attach(orderToUpdate.Customer);
+
+                existingOrder.Customer = _orderingContext.Customers.Local.First(c => c.CustomerId == orderToUpdate.Customer.CustomerId);
+            }
+
+            void UpdateSalesStatus()
+            {
+                if (!_orderingContext.SalesStatuses.Local.Any(s => s.SalesStatusId == orderToUpdate.SalesStatus.SalesStatusId))
+                    _orderingContext.Attach(orderToUpdate.SalesStatus);
+
+                existingOrder.SalesStatus = _orderingContext.SalesStatuses.Local.First(s => s.SalesStatusId == orderToUpdate.SalesStatus.SalesStatusId);
+            }
+
             void UpdateSalesOrderDetailCollection()
             {
-                var entries = _orderingContext.ChangeTracker.Entries<SalesOrderDetail>();
-                foreach (var entry in entries)
-                {
-                    switch (entry.State)
-                    {
-                        case EntityState.Added:
-                            _orderingContext.SalesOrderDetails.Add(entry.Entity);
-                            break;
+                const int UndefinedDetailId = 0;
 
-                        case EntityState.Unchanged:
-                            _orderingContext.SalesOrderDetails.Update(entry.Entity);
-                            break;
+                foreach (var detail in orderToUpdate.Details)
+                {
+                    if (!_orderingContext.Products.Local.Any(p => p.ProductId == detail.Product.ProductId))
+                        _orderingContext.Attach(detail.Product);
+
+                    if (detail.Id == UndefinedDetailId)
+                    {
+                        existingOrder.Details.Add(detail);
+                    }
+                    else
+                    {
+                        var existingDetail = existingOrder.Details.First(sod => sod.Id == detail.Id);
+
+                        _orderingContext.Entry(existingDetail).CurrentValues.SetValues(detail);
+
+                        existingDetail.Product = _orderingContext.Products.Local.First(p => p.ProductId == detail.Product.ProductId);
                     }
                 }
 
-                var existingDetailIds = _orderingContext.SalesOrders.AsNoTracking()
-                    .Where(so => so.SalesOrderId == orderToUpdate.SalesOrderId)
-                    .SelectMany(so => so.Details)
-                    .Select(so => so.Id)
-                    .ToList();
-
-                foreach (var existingDetailId in existingDetailIds)
+                foreach (var existingDetail in existingOrder.Details)
                 {
-                    if (orderToUpdate.Details.Any(detail => detail.Id == existingDetailId))
-                        continue;
-
-                    _orderingContext.SalesOrderDetails.Remove(new SalesOrderDetail() { Id = existingDetailId });
+                    if (!orderToUpdate.Details.Any(sod => sod.Id == existingDetail.Id))
+                        _orderingContext.Remove(existingDetail);
                 }
             }
         }
